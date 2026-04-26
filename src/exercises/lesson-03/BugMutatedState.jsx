@@ -10,11 +10,11 @@
 
 import { useState } from 'react';
 export default function BugMutatedState() {
-  let [count, setCount] = useState(0);
+  const [count, setCount] = useState(0);
 
   function handleAdd() {
-    count++;
-    setCount(count);
+    // count++; - mutates our state!!!
+    setCount(count + 1);
   }
 
   return (
@@ -26,4 +26,7 @@ export default function BugMutatedState() {
 }
 
 // Explanation:
-// (Write your explanation here)
+// First mistake - we had to declare variable for our hook using const.
+// Second and main mistake here - we can not use count++ to mutate the state directly,
+// we had to run setCount to make React change our count and re-render
+// when we call our function with button listener.
