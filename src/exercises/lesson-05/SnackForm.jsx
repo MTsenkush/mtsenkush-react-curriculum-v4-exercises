@@ -1,81 +1,94 @@
 import styles from './SnackForm.module.css';
+import { useState, useEffect } from 'react';
 
-export default function SnackForm({
-  addSnack,
-  editingSnack,
-  cancelEdit,
-  updateSnack,
-  className,
-}) {
-  const isEditing = Boolean(editingSnack);
+export default function SnackForm({ onAddSnack, onUpdateSnack, editingSnack }) {
+  const [name, setName] = useState('');
+  const [rating, setRating] = useState('');
+  const [touched, setTouched] = useState({ name: false, rating: false });
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const name = formData.get('name');
-    const rating = formData.get('rating');
-
-    if (isEditing) {
-      updateSnack(editingSnack.id, name, rating);
+  useEffect(() => {
+    if (editingSnack) {
+      setName(editingSnack.name);
+      setRating(String(editingSnack.rating));
     } else {
-      addSnack(name, rating);
-      e.target.reset();
+      setName('');
+      setRating('');
     }
-  }
+    setTouched({ name: false, rating: false });
+  }, [editingSnack]);
+
+  const validateName = () => name.trim() !== '';
+  const validateRating = () => {
+    return rating >= 1 && rating <= 5;
+  };
+
+  const getNameError = () => {
+    return !validateName() && touched.name ? 'Snack name is required' : '';
+  };
+
+  const getRatingError = () => {
+    return !validateRating() && touched.rating ? 'Please select a rating' : '';
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!validateName() || !validateRating()) {
+      setTouched({ name: true, rating: true });
+      return;
+    }
+
+    const snackInput = {
+      name: name.trim(),
+      rating,
+    };
+
+    if (editingSnack) {
+      onUpdateSnack({ ...editingSnack, ...snackInput });
+    } else {
+      onAddSnack(snackInput);
+      setName('');
+      setRating('');
+    }
+  };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={`${styles.form} ${className || ''}`}
-    >
-      <h3 className={styles['form-title']}>
-        {isEditing ? '✏️ Edit Snack' : '➕ Add Snack'}
-      </h3>
-
-      <div className={styles['field-container']}>
-        <label className={styles['field-label']}>Name:</label>
+    <form className={styles.form} onSubmit={handleSubmit}>
+      <div>
         <input
+          className={styles['field-input']}
           type="text"
-          name="name"
-          defaultValue={isEditing ? editingSnack.name : ''}
-          required
-          className={styles['field-input']}
-          placeholder="Enter snack name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onFocus={() => setTouched((prev) => ({ ...prev, name: true }))}
+          placeholder="Snack name"
         />
-      </div>
 
-      <div className={styles['field-container']}>
-        <label className={styles['field-label']}>Rating:</label>
-        <input
-          type="number"
-          name="rating"
-          defaultValue={isEditing ? editingSnack.rating : ''}
-          required
-          min="1"
-          max="5"
-          className={styles['field-input']}
-          placeholder="Rate 1-5"
-        />
-      </div>
-
-      <div className={styles['button-container']}>
-        <button
-          type="submit"
-          className={`${styles.button} ${styles['submit-button']}`}
-        >
-          {isEditing ? 'Save' : 'Add'}
-        </button>
-
-        {isEditing && (
-          <button
-            type="button"
-            onClick={cancelEdit}
-            className={`${styles.button} ${styles['cancel-button']}`}
-          >
-            Cancel
-          </button>
+        {getNameError() && (
+          <span className={styles.error}>{getNameError()}</span>
         )}
       </div>
+
+      <div>
+        <input
+          className={styles['field-input']}
+          type="number"
+          min="1"
+          max="5"
+          value={rating}
+          onChange={(e) => setRating(e.target.value)}
+          onFocus={() => setTouched((prev) => ({ ...prev, rating: true }))}
+          placeholder="Rating (1-5)"
+        />
+
+        {getRatingError() && (
+          <span className={styles.error}>{getRatingError()}</span>
+        )}
+      </div>
+
+      <button type="submit" className={styles['button']}>
+        {editingSnack ? 'Update Snack' : 'Add Snack'}
+      </button>
     </form>
   );
 }
