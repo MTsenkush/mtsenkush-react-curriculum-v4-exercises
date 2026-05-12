@@ -12,21 +12,25 @@ export default function SnackManager() {
   const [nextId, setNextId] = useState(4);
   const [editingSnack, setEditingSnack] = useState(null);
 
-  function addSnack(name, rating) {
+  function addSnack(snackInput) {
     const newSnack = {
       id: nextId,
-      name: name.trim(),
-      rating: parseInt(rating, 10),
+      name: snackInput.name.trim(),
+      rating: Number(snackInput.rating),
     };
-    setSnacks([...snacks, newSnack]);
-    setNextId(nextId + 1);
+    setSnacks((prev) => [...prev, newSnack]);
+    setNextId((prev) => prev + 1);
   }
 
-  function updateSnack(id, name, rating) {
-    setSnacks(
-      snacks.map((snack) =>
-        snack.id === id
-          ? { ...snack, name: name.trim(), rating: parseInt(rating, 10) }
+  function updateSnack(updatedSnack) {
+    setSnacks((prev) =>
+      prev.map((snack) =>
+        snack.id === updatedSnack.id
+          ? {
+              ...snack,
+              name: updatedSnack.name.trim(),
+              rating: Number(updatedSnack.rating),
+            }
           : snack
       )
     );
@@ -34,7 +38,7 @@ export default function SnackManager() {
   }
 
   function deleteSnack(id) {
-    setSnacks(snacks.filter((snack) => snack.id !== id));
+    setSnacks((prev) => prev.filter((snack) => snack.id !== id));
     if (editingSnack && editingSnack.id === id) {
       setEditingSnack(null);
     }
@@ -44,20 +48,14 @@ export default function SnackManager() {
     setEditingSnack(snack);
   }
 
-  function cancelEdit() {
-    setEditingSnack(null);
-  }
-
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>Snack Manager</h2>
 
       <SnackForm
-        addSnack={addSnack}
+        onAddSnack={addSnack}
+        onUpdateSnack={updateSnack}
         editingSnack={editingSnack}
-        cancelEdit={cancelEdit}
-        updateSnack={updateSnack}
-        className={styles['exercise-area']}
       />
 
       <div className={styles['snacks-section']}>

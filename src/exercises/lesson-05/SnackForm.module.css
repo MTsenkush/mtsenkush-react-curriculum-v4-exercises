@@ -21,12 +21,13 @@
 }
 
 .field-input {
-  width: 100%;
+  width: 50%;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
   box-sizing: border-box;
+  display: inline;
 }
 
 .field-input:focus {
@@ -74,7 +75,7 @@
   color: #d32f2f;
   font-size: 0.875rem;
   margin-top: 4px;
-  display: flex;
+  /* display: flex; */
   align-items: center;
   gap: 4px;
 }
